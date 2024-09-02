@@ -1,0 +1,57 @@
+{{ block "index" . }}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Golang Shit</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.colors.min.css">
+	<script src="https://unpkg.com/htmx.org/dist/htmx.js"></script>
+</head>
+
+<body class="container">
+	{{ template "form" .Form }}
+	<hr />
+	{{ template "display" .Data }}
+	<script>
+		document.addEventListener("DOMContentLoaded", (event) => {
+			document.body.addEventListener("htmx:beforeSwap", function (evt) {
+				console.log("here")
+				if (evt.detail.xhr.status === 422) {
+					evt.detail.shouldSwap = true
+					evt.detail.isError = false;
+				}
+			});
+
+		})
+	</script>
+</body>
+
+</html>
+{{ end }}
+
+{{ block "form" .}}
+<form hx-swap="outerHTML" hx-post="/contacts">
+	name: <input {{ if .Values.name }} value="{{ .Values.name }}" {{ end}} type="text" name="name" />
+	email: <input {{ if .Values.email }} value="{{ .Values.email }}" {{ end}} type="text" name="email" />
+	{{ if .Errors.email }}
+	<hr />
+	<div class="pico-color-red-500">{{ .Errors.email }}</div>
+	<hr />
+	{{ end }}
+	<button type="submit">Create Contact</button>
+</form>
+{{ end }}
+
+{{ block "display" . }}
+<div id="contacts">
+	{{ range .Contacts }}
+	<div>
+		Name: <span>{{ .Name }}</span>
+		Email: <span>{{ .Email }}</span>
+	</div>
+	{{ end }}
+</div>
+{{ end}}
